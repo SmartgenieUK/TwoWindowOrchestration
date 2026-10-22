@@ -1,0 +1,15 @@
+returned-deviation
+Changed: nothing. The check before work failed, so no file was edited.
+Gap 1, contradicts the contract: the brief asks for three retries after the first request,
+  four attempts in total. docs/CONTRACT.md D001 fixes 3 as total attempts.
+  Fix: restate the outcome as the contract's policy, with attempt == max_attempts returning False.
+Gap 2, no owned paths: "touch whatever makes sense". Fix: Owned product path: src/retry_policy.py.
+Gap 3, no out-of-scope list, and it invites backoff and jitter, which AGENTS.md and the
+  executor prompt rule out. Fix: out of scope: network I/O, delays, write-method retries,
+  dependencies, test or tool edits.
+Gap 4, no kill criterion. Fix: stop if the fix needs any file outside the owned path.
+Gap 5, checks are not re-runnable: "make sure the tests pass". Fix: run
+  python tools/workflow.py check --suite basic and --suite acceptance.
+Evidence: docs/co-arch/BRIEF-001-retry-budget.md sections 1 and 2; docs/CONTRACT.md D001.
+Attempt budget: not used. A brief defect is not a delivery attempt.
+Question: none

@@ -36,18 +36,20 @@ Keep both sessions in the SAME physical directory. Separate cloud tasks and sepa
 worktrees do not share the handoff files automatically. Normal tool permissions still apply.
 There is no unattended dispatcher. A short wake-up message starts the next agent turn.
 
-## Seven-minute participant exercise
+## Try it yourself after the session
 
-1. **By minute 2:** Read `docs/CONTRACT.md` and predict the final attempt. Run the basic
-   and acceptance tests until the failing boundary is clear.
-2. **By minute 5:** Create and issue a brief with the commands below. In your executor
-   session, fix only `src/retry_policy.py`, then run checks and return an honest handback.
-3. **By minute 7:** In the reviewer session, inspect the code against the contract, rerun
-   acceptance checks and record review notes. Accept only when behaviour and evidence agree.
-4. **Last step:** Close the transcript and explain why attempt 3 cannot retry.
-   Write a one-line verdict plus a digest of five lines or fewer.
+The lesson demos this loop live. To close it yourself, allow about ten minutes:
 
-Fast finishers: name one production risk this tiny policy does not cover. Do not add it to the brief.
+1. Read `docs/CONTRACT.md` and predict the final attempt. Run the basic and acceptance
+   tests until the failing boundary is clear.
+2. Create and issue a brief with the commands below. In your executor session, fix only
+   `src/retry_policy.py`, then run checks and return an honest handback.
+3. In the reviewer session, inspect the code against the contract, rerun acceptance
+   checks and record review notes. Accept only when behaviour and evidence agree.
+4. Close the transcript and explain why attempt 3 cannot retry. Write a one-line
+   verdict plus a digest of five lines or fewer.
+
+Stretch: name one production risk this tiny policy does not cover. Do not add it to the brief.
 
 ```bash
 python tools/workflow.py new
@@ -116,6 +118,19 @@ The start command refuses to overwrite an existing directory. The repair command
 the supplied solution in that rehearsal copy only. For a live agent demo, stop after
 rejection, issue the brief in the rehearsal copy and ask the executor to repair it instead.
 Allow at most 90 seconds of live waiting before switching to the labelled replay.
+
+### Prepared briefs
+
+[`fixtures/briefs/GOOD_BRIEF.md`](fixtures/briefs/GOOD_BRIEF.md) explains, line by line, what a
+brief must include. [`fixtures/briefs/DEVIATION_BRIEF.md`](fixtures/briefs/DEVIATION_BRIEF.md) is
+a brief with deliberate gaps. To show the executor's check before work, issue it in a fresh copy:
+
+```bash
+python tools/demo.py deviation --dest ../SmartRetry_deviation_1
+```
+
+Then start the executor in that folder. It should change nothing and hand back
+`returned-deviation`. If it stalls, the command prints the scripted fallback handback to return.
 
 ## What to take to your own repository
 

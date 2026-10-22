@@ -2,6 +2,7 @@
 """Deterministic teaching replay. Every step is scripted; no AI is called."""
 import argparse
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -16,18 +17,40 @@ def invoke(root, *args, expected=0):
     if result.returncode != expected:
         raise RuntimeError(f'{args}: expected exit {expected}, got {result.returncode}')
 
-def start(dest):
+def copy_lab(dest):
     dest = dest.resolve()
     if dest.exists():
         raise ValueError('Destination exists. Choose a new empty path; the demo never resets a working copy.')
     # Copy only explicit lab content, never another generated rehearsal directory.
+    # Prepared briefs stay out so a live executor cannot read the expected answer.
     dest.mkdir(parents=True)
     for name in ['src', 'tests', 'tools', 'fixtures', 'docs', '.claude']:
-        shutil.copytree(SOURCE / name, dest / name, ignore=shutil.ignore_patterns('__pycache__', '*.pyc', '.lock', 'evidence', 'BRIEF-*.md'))
+        shutil.copytree(SOURCE / name, dest / name, ignore=shutil.ignore_patterns(
+            '__pycache__', '*.pyc', '.lock', 'evidence', 'BRIEF-*.md', 'briefs', 'logs'))
     for name in ['AGENTS.md', 'CLAUDE.md', 'README.md']:
         shutil.copy2(SOURCE / name, dest / name)
     (dest / '.smartretry-rehearsal').write_text('Created by tools/demo.py\n')
     shutil.copy2(dest / 'fixtures/flawed.py.txt', dest / 'src/retry_policy.py')
+    return dest
+
+def deviation(dest):
+    dest = copy_lab(dest)
+    print('SCRIPTED SETUP: an authored brief with deliberate gaps, issued for a live executor.\n')
+    invoke(dest, 'new')
+    prepared = (SOURCE / 'fixtures/briefs/DEVIATION_BRIEF.md').read_text(encoding='utf-8')
+    context = prepared.split('## 1 Context and decision\n', 1)[1].split('## 2 Brief\n', 1)
+    brief = dest / 'docs/co-arch/BRIEF-001-retry-budget.md'
+    text = brief.read_text(encoding='utf-8')
+    for number, body in [(1, context[0]), (2, context[1])]:
+        text = re.sub(rf'(<!-- section:{number} -->\n).*?(\n<!-- /section:{number} -->)',
+                      lambda m: m.group(1) + body.strip() + m.group(2), text, flags=re.S)
+    brief.write_text(text, encoding='utf-8', newline='\n')
+    invoke(dest, 'issue')
+    print(f'\nPrepared: {dest}\nNext: start the executor in that folder; it should return returned-deviation.\n'
+          f'Fallback: python tools/workflow.py return --summary {SOURCE / "fixtures/briefs/DEVIATION_HANDBACK.txt"}')
+
+def start(dest):
+    dest = copy_lab(dest)
     print('SCRIPTED REPLAY: a seeded defect and deliberately incomplete historical handback.\n')
     invoke(dest, 'new'); invoke(dest, 'issue')
     invoke(dest, 'check', '--suite', 'basic')
@@ -75,13 +98,15 @@ def check_root(root):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest='command', required=True)
-    s = sub.add_parser('start'); s.add_argument('--dest', type=Path, required=True)
+    for name in ['start', 'deviation']:
+        s = sub.add_parser(name); s.add_argument('--dest', type=Path, required=True)
     for name in ['reject', 'repair']:
         s = sub.add_parser(name); s.add_argument('--root', type=Path, required=True)
     sub.add_parser('run')
     args = p.parse_args()
     try:
         if args.command == 'start': start(args.dest)
+        elif args.command == 'deviation': deviation(args.dest)
         elif args.command == 'reject': reject(args.root.resolve())
         elif args.command == 'repair': repair(args.root.resolve())
         else:
