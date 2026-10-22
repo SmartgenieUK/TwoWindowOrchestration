@@ -1,0 +1,17 @@
+"""Reference solution for the workshop contract. No network I/O."""
+RETRYABLE_STATUSES = frozenset({429, 500, 502, 503, 504})
+
+def should_retry(method: str, status: int, attempt: int, max_attempts: int = 3) -> bool:
+    """Return whether another attempt is permitted after the current attempt."""
+    if not isinstance(method, str) or not method.strip():
+        raise ValueError('method must be a non-empty string')
+    for name, value in [('status', status), ('attempt', attempt), ('max_attempts', max_attempts)]:
+        if type(value) is not int:
+            raise ValueError(f'{name} must be an integer, excluding bool')
+    if not 100 <= status <= 599:
+        raise ValueError('status must be between 100 and 599')
+    if attempt < 1 or max_attempts < 1:
+        raise ValueError('attempt and max_attempts must be positive')
+    return (method.strip().upper() in {'GET', 'HEAD'}
+            and status in RETRYABLE_STATUSES
+            and attempt < max_attempts)

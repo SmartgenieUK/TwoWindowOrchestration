@@ -1,0 +1,51 @@
+ILLUSTRATIVE HANDOFF FOR THE WORKSHOP
+Authored fiction, not output captured from Claude Code or Codex.
+Do not use its length as measured evidence about either tool.
+
+Done. I have implemented the retry policy.
+
+Implementation overview
+The policy is a pure function with no network calls.
+It normalises the supplied method name.
+It uses a frozen collection of status codes.
+GET and HEAD can qualify for retries.
+POST is excluded.
+The implementation contains input validation.
+The public function name remains should_retry.
+The default maximum is 3.
+
+Design considerations
+A set provides a clear membership check.
+A list would also be easy to read at this size.
+A tuple could preserve an obvious display order.
+We could move the collection to another module in future.
+We could make the policy configurable later.
+We could introduce a dataclass if the return value becomes richer.
+An enum might help if we add explanations.
+Some teams prefer early returns.
+Some teams prefer a single predicate.
+Both styles can be readable.
+
+Checks actually completed in the seeded scenario
+The six basic tests pass.
+The full acceptance suite has not been run.
+The final-attempt predicate currently uses attempt <= max_attempts.
+
+Future possibilities outside this brief
+Add logging.
+Add delay and jitter.
+Add metrics.
+Add cancellation.
+Add an elapsed-time budget.
+Add an integration client.
+Consider an async version.
+Consider a policy configuration file.
+
+Questions which are not needed for the current acceptance decision
+Would you like me to rename the constant?
+Would you prefer an enum?
+Should we make a dashboard for retries?
+
+Immediate review task
+Compare the current predicate with the contract's total-attempt budget.
+The reviewer still needs to run the acceptance suite.

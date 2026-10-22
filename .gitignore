@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+runs/
+.rehearsal*/
+docs/co-arch/.lock
+.claude/logs/

@@ -1,0 +1,8 @@
+ILLUSTRATIVE RECEIPT AFTER THE REVIEWER CHECKS THE SEEDED DEFECT
+
+blocked
+The final allowed attempt schedules one more request.
+The returned code violates the total-attempt contract.
+Evidence: the final-attempt acceptance check.
+Next: a scoped correction from <= to <, then another review.
+No owner decision needed.
