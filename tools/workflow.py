@@ -220,7 +220,7 @@ def main():
             elif args.command == 'review': return review(args.verdict, args.notes.resolve())
             elif args.command == 'status':
                 rebuild_index()
-                print((STATE / 'INDEX.md').read_text(), end='')
+                print((STATE / 'INDEX.md').read_text(encoding='utf-8'), end='')
             elif args.command == 'diff':
                 original=(ROOT / 'fixtures/flawed.py.txt').read_text().splitlines(keepends=True)
                 current=(ROOT / 'src/retry_policy.py').read_text().splitlines(keepends=True)

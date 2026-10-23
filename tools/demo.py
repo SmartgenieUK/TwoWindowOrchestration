@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Deterministic teaching replay. Every step is scripted; no AI is called."""
 import argparse
+import os
 from pathlib import Path
 import re
 import shutil
@@ -11,8 +12,10 @@ import tempfile
 SOURCE = Path(__file__).resolve().parents[1]
 
 def invoke(root, *args, expected=0):
+    # Pin the pipe encoding: otherwise Windows decodes the child's output with the locale codepage.
     result = subprocess.run([sys.executable, 'tools/workflow.py', *args], cwd=root,
-                            capture_output=True, text=True)
+                            capture_output=True, encoding='utf-8',
+                            env={**os.environ, 'PYTHONIOENCODING': 'utf-8'})
     print(result.stdout + result.stderr, end='')
     if result.returncode != expected:
         raise RuntimeError(f'{args}: expected exit {expected}, got {result.returncode}')
